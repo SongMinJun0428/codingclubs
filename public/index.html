@@ -233,22 +233,37 @@
       document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
       event.target.classList.add('active');
     }
-
-    const users = {
-      "admin": "1234",
-      "박우승": "p4783907",
-      "육성현": "09020821!!",
-      "이채환": "nano8778",
-      "김하람": "akaski2006",
-      "이도현": "",
-      "박시우": "icanho75",
-      "정진우": "jinwoojeong",
-      "정진찬": "jinchanjeong",
-      "박용현": "younghyeon"
-    };
   
     // ✅ 로그인 처리
-    function login() {
+    async function login() {
+  const id = document.getElementById("login-id").value.trim();
+  const pw = document.getElementById("login-pw").value.trim();
+
+  const res = await fetch("/api/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id, pw })
+  });
+
+  const result = await res.json();
+
+  if (result.success) {
+    localStorage.setItem("loggedIn", "true");
+    localStorage.setItem("username", id);
+    localStorage.setItem("isAdmin", result.isAdmin ? "true" : "false");
+
+    document.getElementById("login-screen").classList.add("hidden");
+    document.getElementById("main-content").classList.remove("hidden");
+    document.getElementById("welcome-text").textContent = `👋 ${id}님 환영합니다!`;
+
+    markAttendance();
+    addXP(10);
+    updateXP();
+    restoreMemo();
+  } else {
+    document.getElementById("login-error").classList.remove("hidden");
+  }
+}
       const id = document.getElementById("login-id").value.trim();
       const pw = document.getElementById("login-pw").value.trim();
   
@@ -268,7 +283,7 @@
       } else {
         document.getElementById("login-error").classList.remove("hidden");
       }
-    }
+  
   
     // ✅ 로그인 유지
     window.onload = () => {
@@ -360,20 +375,33 @@
     }
 
     // ✅ 관리자 인증 및 ID/PW 확인
-    function checkUser() {
+    async function checkUser() {
+  const value = document.getElementById("userInput").value.trim();
+  const result = document.getElementById("result");
+  const button = document.getElementById("gotoButton");
+
+  const res = await fetch("/api/check-user", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: value })
+  });
+
+  if (res.ok) {
+    const data = await res.json();
+    result.textContent = `✅ ID: ${data.id} | Password: ${data.pw}`;
+    button.classList.add("hidden");
+  } else if (value === "1234" && localStorage.getItem("isAdmin") === "true") {
+    result.textContent = "✅ 관리자 인증 성공";
+    button.classList.remove("hidden");
+  } else {
+    result.textContent = "해당 이름 또는 비밀번호를 찾을 수 없습니다.";
+    button.classList.add("hidden");
+  }
+}
       const value = document.getElementById("userInput").value.trim();
       const result = document.getElementById("result");
       const button = document.getElementById("gotoButton");
 
-      const userInfo = {
-        "박우승": "박우승13570 / 621843",
-        "육성현": "육성현77373 / 214898",
-        "이채환": "이채환31948 / bd1234",
-        "김하람": "김하람28476 / 706587",
-        "이도현": "이도현39857 / bd1234",
-        "박시우": "박시우15328 / bd1234",
-        "박용현": "박용현49224 / bd1234"
-      };
 
       if (userInfo[value]) {
         const [id, pw] = userInfo[value].split(" / ");
@@ -386,7 +414,7 @@
         result.textContent = "해당 이름 또는 비밀번호를 찾을 수 없습니다.";
         button.classList.add('hidden');
       }
-    }
+    
 
   
   function toggleCalendar() {

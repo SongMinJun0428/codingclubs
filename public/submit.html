@@ -2,67 +2,40 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>숙제 제출</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
-  <style>
-    body {
-      font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
-      background: linear-gradient(to bottom right, #e0e7ff, #ffffff);
-    }
-  </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-6">
-  <p id="logged-user" class="text-right text-sm text-gray-700 mb-4"></p>
+<body class="bg-blue-50 min-h-screen flex items-center justify-center p-4">
+  <div class="bg-white p-6 rounded shadow-md w-full max-w-lg">
+    <h1 class="text-2xl font-bold text-blue-800 mb-4">📨 숙제 제출하기</h1>
 
-  <div class="w-full max-w-2xl bg-white p-8 rounded shadow-lg">
-    <h1 class="text-3xl font-bold text-blue-800 mb-6">📚 숙제 제출하기</h1>
+    <input id="name" type="text" placeholder="이름" class="w-full border p-2 mb-3 rounded" />
+    <input id="title" type="text" placeholder="과제명" class="w-full border p-2 mb-3 rounded" />
+    <textarea id="comment" placeholder="코멘트 (선택)" class="w-full border p-2 mb-3 rounded"></textarea>
 
-    <form name="homework" method="POST" data-netlify="true" enctype="multipart/form-data">
-      <!-- 🔐 숨겨진 폼 이름 필수 -->
-      <input type="hidden" name="form-name" value="homework" />
-    
-      <!-- 이름 (자동 입력) -->
-      <label class="block mb-2 text-left text-sm font-semibold">이름</label>
-      <input type="text" name="name" id="student-name" readonly class="w-full border p-2 rounded mb-4 bg-gray-100 text-gray-700"/>
-    
-      <!-- 과제명 -->
-      <label class="block mb-2 text-left text-sm font-semibold">과제명</label>
-      <input type="text" name="title" required placeholder="예: 파이썬 2주차 숙제" class="w-full border p-2 rounded mb-4"/>
-    
-      <!-- 파일 업로드 -->
-      <label class="block mb-2 text-left text-sm font-semibold">숙제 파일 업로드</label>
-      <input type="file" name="file" required class="w-full border p-2 rounded mb-4"/>
-    
-      <!-- 코멘트 -->
-      <label class="block mb-2 text-left text-sm font-semibold">코멘트 (선택)</label>
-      <textarea name="comment" placeholder="코멘트를 입력해 주세요" class="w-full border p-2 rounded mb-6"></textarea>
-    
-      <button type="submit" class="bg-blue-600 text-white font-bold py-2 px-6 rounded hover:bg-blue-700">제출하기</button>
-    </form>
-    
+    <button onclick="submit()" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">제출</button>
+    <p id="status" class="mt-3 text-sm text-green-600 hidden">✅ 제출 완료되었습니다!</p>
   </div>
 
-  <script>
-    window.onload = function () {
-      const isLoggedIn = localStorage.getItem("loggedIn");
-      const username = localStorage.getItem("username");
-    
-      if (!isLoggedIn || !username) {
-        alert("로그인이 필요합니다.");
-        window.location.href = "index.html";
-      } else {
-        document.getElementById("student-name").value = username;
-        document.getElementById("logged-user").textContent = `현재 로그인: ${username}`;
-      }
-    };
-    function logout() {
-      localStorage.removeItem("loggedIn");
-      localStorage.removeItem("username");
-      localStorage.removeItem("isAdmin");
-      location.reload();
+<script>
+  async function submit() {
+    const name = document.getElementById("name").value.trim();
+    const title = document.getElementById("title").value.trim();
+    const comment = document.getElementById("comment").value.trim();
+
+    const res = await fetch("/api/submit-homework", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, title, comment })
+    });
+
+    if (res.ok) {
+      document.getElementById("status").classList.remove("hidden");
+    } else {
+      alert("제출 실패. 다시 시도해주세요.");
     }
-    
-  </script>
+  }
+</script>
 </body>
 </html>

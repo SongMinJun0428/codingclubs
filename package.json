@@ -1,7 +1,4 @@
 {
-  "name": "coding-vercel",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {},
-  "dependencies": {}
+  "name": "vercel-homework",
+  "version": "1.0.0"
 }
